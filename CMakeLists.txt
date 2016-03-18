@@ -177,6 +177,7 @@ elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   set(BOOST_COMPONENTS ${BOOST_COMPONENTS} date_time chrono zlib)
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
   add_definitions(-DNOMINMAX) # avoid min and max macros that can break compilation
+  add_definitions(-D_USE_MATH_DEFINES) #needed for M_PI with cmath.h
   add_definitions(-D_WIN32_WINNT=0x0501)
   add_definitions(-DXML_STATIC)
   find_library(ws2_32_LIBRARY_PATH ws2_32)
