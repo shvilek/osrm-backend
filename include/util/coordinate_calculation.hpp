@@ -4,6 +4,7 @@
 #include "util/coordinate.hpp"
 
 #include <boost/math/constants/constants.hpp>
+#include <boost/optional.hpp>
 
 #include <utility>
 
@@ -24,13 +25,13 @@ const constexpr double EARTH_RADIUS_WGS84 = 6378137.0;
 
 namespace detail
 {
-    // earth circumference devided by 2
-    const constexpr double MAXEXTENT = EARTH_RADIUS_WGS84 * boost::math::constants::pi<double>();
-    // ^ math functions are not constexpr since they have side-effects (setting errno) :(
-    const double MAX_LATITUDE = RAD_TO_DEGREE * (2.0 * std::atan(std::exp(180.0 * DEGREE_TO_RAD)) - boost::math::constants::half_pi<double>());
-    const constexpr double MAX_LONGITUDE = 180.0;
+// earth circumference devided by 2
+const constexpr double MAXEXTENT = EARTH_RADIUS_WGS84 * boost::math::constants::pi<double>();
+// ^ math functions are not constexpr since they have side-effects (setting errno) :(
+const double MAX_LATITUDE = RAD_TO_DEGREE * (2.0 * std::atan(std::exp(180.0 * DEGREE_TO_RAD)) -
+                                             boost::math::constants::half_pi<double>());
+const constexpr double MAX_LONGITUDE = 180.0;
 }
-
 
 //! Projects both coordinates and takes the euclidean distance of the projected points
 // Does not return meters!
@@ -69,6 +70,16 @@ double bearing(const Coordinate first_coordinate, const Coordinate second_coordi
 // Get angle of line segment (A,C)->(C,B)
 double computeAngle(const Coordinate first, const Coordinate second, const Coordinate third);
 
+// find the cnter of a circle through three coordinates
+boost::optional<Coordinate> circleCenter(const Coordinate first_coordinate,
+                                         const Coordinate second_coordinate,
+                                         const Coordinate third_coordinate);
+
+// find the radius of a circle through three coordinates
+double circleRadius(const Coordinate first_coordinate,
+                    const Coordinate second_coordinate,
+                    const Coordinate third_coordinate);
+
 // factor in [0,1]. Returns point along the straight line between from and to. 0 returns from, 1
 // returns to
 Coordinate interpolateLinear(double factor, const Coordinate from, const Coordinate to);
@@ -84,8 +95,10 @@ double degreeToPixel(FloatLatitude lat, unsigned zoom);
 double degreeToPixel(FloatLongitude lon, unsigned zoom);
 FloatLatitude yToLat(const double value);
 double latToY(const FloatLatitude latitude);
-void xyzToMercator(const int x, const int y, const int z, double &minx, double &miny, double &maxx, double &maxy);
-void xyzToWSG84(const int x, const int y, const int z, double &minx, double &miny, double &maxx, double &maxy);
+void xyzToMercator(
+    const int x, const int y, const int z, double &minx, double &miny, double &maxx, double &maxy);
+void xyzToWSG84(
+    const int x, const int y, const int z, double &minx, double &miny, double &maxx, double &maxy);
 } // ns mercator
 } // ns coordinate_calculation
 } // ns util

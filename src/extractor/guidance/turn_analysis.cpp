@@ -2,6 +2,7 @@
 
 #include "util/simple_logger.hpp"
 #include "util/coordinate.hpp"
+#include "util/coordinate_calculation.hpp"
 
 #include <cstddef>
 #include <limits>
@@ -95,6 +96,50 @@ inline bool isRampClass(EdgeID eid, const util::NodeBasedDynamicGraph &node_base
 
 } // namespace detail
 
+double TurnAnalysis::findRoundaboutRadius(const NodeID nid) const
+{
+
+    const auto getCoordinate = [this](const NodeID node)
+    {
+        return util::Coordinate(node_info_list[node].lon, node_info_list[node].lat);
+    };
+
+    const auto getNextOnRoundabout = [this](const NodeID node)
+    {
+        for (const EdgeID edge : node_based_graph.GetAdjacentEdgeRange(node))
+        {
+            const auto &edge_data = node_based_graph.GetEdgeData(edge);
+            if (!edge_data.reversed && edge_data.roundabout)
+                return node_based_graph.GetTarget(edge);
+        }
+        // this cannot happen, if we are actually on a roundabout
+        BOOST_ASSERT(false);
+        return SPECIAL_NODEID;
+    };
+
+    // the roundabout radius has to be the same for all locations we look at it from
+    // to guarantee this, we search the full roundabout for its vertices
+    // and select the three smalles ids
+    std::vector<NodeID> roundabout_nodes;
+    roundabout_nodes.reserve(40);
+    roundabout_nodes.push_back(nid);
+    while (roundabout_nodes.size() < 40) // hard abort if something is wrong
+    {
+        auto nid = getNextOnRoundabout(roundabout_nodes.back());
+        if (nid == roundabout_nodes.front()) // circled the roundabout
+            break;
+
+        roundabout_nodes.push_back(nid);
+    }
+    std::sort(roundabout_nodes.begin(), roundabout_nodes.end());
+    if (roundabout_nodes.size() < 3)
+        return 0;
+
+    return util::coordinate_calculation::circleRadius(getCoordinate(roundabout_nodes[0]),
+                                                      getCoordinate(roundabout_nodes[1]),
+                                                      getCoordinate(roundabout_nodes[2]));
+}
+
 std::vector<TurnOperation> TurnAnalysis::getTurns(const NodeID from, const EdgeID via_edge) const
 {
     localizer.node_info_list = &node_info_list;
@@ -124,7 +169,9 @@ std::vector<TurnOperation> TurnAnalysis::getTurns(const NodeID from, const EdgeI
     }
     if (on_roundabout || can_enter_roundabout)
     {
-        intersection = handleRoundabouts(via_edge, on_roundabout, can_exit_roundabout,
+        const auto radius = findRoundaboutRadius(node_based_graph.GetTarget(via_edge));
+        // find the radius of the roundabout
+        intersection = handleRoundabouts(radius, via_edge, on_roundabout, can_exit_roundabout,
                                          std::move(intersection));
     }
     else
@@ -172,11 +219,16 @@ inline std::size_t countValid(const std::vector<ConnectedRoad> &intersection)
 }
 
 std::vector<ConnectedRoad>
-TurnAnalysis::handleRoundabouts(const EdgeID via_edge,
+TurnAnalysis::handleRoundabouts(const double radius,
+                                const EdgeID via_edge,
                                 const bool on_roundabout,
                                 const bool can_exit_roundabout,
                                 std::vector<ConnectedRoad> intersection) const
 {
+    (void) radius;
+//    const auto coord = localizer(node_based_graph.GetTarget(via_edge));
+//    std::cout << "Roundabout radius: " << radius << " at " << std::setprecision(12)
+//              << toFloating(coord.lat) << " " << std::setprecision(12) << toFloating(coord.lon) << std::endl;
     // TODO requires differentiation between roundabouts and rotaries
     // detect via radius (get via circle through three vertices)
     NodeID node_v = node_based_graph.GetTarget(via_edge);
@@ -1051,7 +1103,7 @@ void TurnAnalysis::handleDistinctConflict(const EdgeID via_edge,
         }
         else
         {
-            // FIXME this should possibly know about the actual roads?
+            // FIXME this should possibly know aboat the actual roads?
             left.turn.instruction = getInstructionForObvious(4, via_edge, left);
             right.turn.instruction = {findBasicTurnType(via_edge, right),
                                       DirectionModifier::SlightRight};
