@@ -1,5 +1,5 @@
 @routing  @guidance
-Feature: Basic Roundabout
+Feature: Fork Instructions
 
     Background:
         Given the profile "testbot"
@@ -17,10 +17,9 @@ Feature: Basic Roundabout
             | bc     | primary |
             | bd     | primary |
 
-
        When I route I should get
             | waypoints | route      | turns                      |
-            | a,d       | ab, bc, bc | depart, fork-left, arrive  |
+            | a,c       | ab, bc, bc | depart, fork-left, arrive  |
             | a,d       | ab, bd, bd | depart, fork-right, arrive |
 
     Scenario: Do not fork on link type
@@ -37,7 +36,7 @@ Feature: Basic Roundabout
 
        When I route I should get
             | waypoints | route   | turns                             |
-            | a,d       | abc     | depart, arrive                    |
+            | a,c       | abc     | depart, arrive                    |
             | a,d       | abc, bd | depart, turn-slight-right, arrive |
 
     Scenario: Fork in presence of other roads
@@ -55,7 +54,7 @@ Feature: Basic Roundabout
 
        When I route I should get
             | waypoints | route      | turns                      |
-            | a,d       | ab, bc, bc | depart, fork-left, arrive  |
+            | a,c       | ab, bc, bc | depart, fork-left, arrive  |
             | a,d       | ab, bd, bd | depart, fork-right, arrive |
 
     Scenario: Fork Turning Slight Left
@@ -70,10 +69,9 @@ Feature: Basic Roundabout
             | bc     | primary |
             | bd     | primary |
 
-
        When I route I should get
             | waypoints | route      | turns                      |
-            | a,d       | ab, bc, bc | depart, fork-left, arrive  |
+            | a,c       | ab, bc, bc | depart, fork-left, arrive  |
             | a,d       | ab, bd, bd | depart, fork-right, arrive |
 
     Scenario: Fork Turning Slight Right
@@ -88,8 +86,24 @@ Feature: Basic Roundabout
             | bc     | primary |
             | bd     | primary |
 
-
        When I route I should get
             | waypoints | route      | turns                      |
-            | a,d       | ab, bc, bc | depart, fork-left, arrive  |
+            | a,c       | ab, bc, bc | depart, fork-left, arrive  |
             | a,d       | ab, bd, bd | depart, fork-right, arrive |
+
+    Scenario: Do not fork on service
+        Given the node map
+            |   |   |   |   | c |
+            | a |   | b |   |   |
+            |   |   |   |   | d |
+
+        And the ways
+            | nodes  | highway     |
+            | abc    | residential |
+            | bd     | service     |
+
+       When I route I should get
+            | waypoints | route   | turns                             |
+            | a,c       | abc     | depart, arrive                    |
+            | a,d       | abc, bd | depart, turn-slight-right, arrive |
+
