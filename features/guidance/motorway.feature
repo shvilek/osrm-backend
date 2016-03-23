@@ -1,5 +1,5 @@
 @routing  @guidance
-Feature: Basic Roundabout
+Feature: Motorway Guidance
 
     Background:
         Given the profile "testbot"
