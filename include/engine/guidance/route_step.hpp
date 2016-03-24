@@ -25,6 +25,7 @@ struct RouteStep
 {
     unsigned name_id;
     std::string name;
+    std::string additional_name;
     double duration;
     double distance;
     extractor::TravelMode mode;

@@ -260,6 +260,7 @@ double computeAngle(const Coordinate first, const Coordinate second, const Coord
 boost::optional<Coordinate>
 circleCenter(const Coordinate C1, const Coordinate C2, const Coordinate C3)
 {
+    // free after http://paulbourke.net/geometry/circlesphere/
     // require three distinct points
     if (C1 == C2 || C2 == C3 || C1 == C3)
         return boost::none;

@@ -70,7 +70,7 @@ double bearing(const Coordinate first_coordinate, const Coordinate second_coordi
 // Get angle of line segment (A,C)->(C,B)
 double computeAngle(const Coordinate first, const Coordinate second, const Coordinate third);
 
-// find the cnter of a circle through three coordinates
+// find the center of a circle through three coordinates
 boost::optional<Coordinate> circleCenter(const Coordinate first_coordinate,
                                          const Coordinate second_coordinate,
                                          const Coordinate third_coordinate);

@@ -40,10 +40,10 @@ const constexpr char *modifier_names[] = {"uturn",
 // translations of TurnTypes. Not all types are exposed to the outside world.
 // invalid types should never be returned as part of the API
 const constexpr char *turn_type_names[] = {
-    "invalid",        "no turn", "invalid",    "new name",    "continue",       "turn",
-    "turn",           "turn",    "turn",       "turn",        "merge",          "ramp",
-    "ramp",           "ramp",    "ramp",       "ramp",        "fork",           "end of road",
-    "roundabout",     "invalid", "roundabout", "invalid",     "traffic circle", "invalid",
+    "invalid",        "no turn", "invalid",    "new name",    "continue",    "turn",
+    "turn",           "turn",    "turn",       "turn",        "merge",       "ramp",
+    "ramp",           "ramp",    "ramp",       "ramp",        "fork",        "end of road",
+    "roundabout",     "invalid", "roundabout", "invalid",     "rotary",      "invalid",
     "traffic circle", "invalid", "invalid",    "restriction", "notification"};
 const constexpr char *waypoint_type_names[] = {"invalid", "arrive", "depart"};
 
@@ -144,6 +144,7 @@ util::json::Object makeStepManeuver(const guidance::StepManeuver &maneuver)
     if (detail::isValidModifier(maneuver))
         step_maneuver.values["modifier"] =
             detail::instructionModifierToString(maneuver.instruction.direction_modifier);
+
     step_maneuver.values["location"] = detail::coordinateToLonLat(maneuver.location);
     step_maneuver.values["bearing_before"] = maneuver.bearing_before;
     step_maneuver.values["bearing_after"] = maneuver.bearing_after;
@@ -164,6 +165,9 @@ util::json::Object makeRouteStep(guidance::RouteStep step, util::json::Value geo
     route_step.values["distance"] = std::move(step.distance);
     route_step.values["duration"] = std::move(step.duration);
     route_step.values["name"] = std::move(step.name);
+    if (step.additional_name != "")
+        route_step.values["additional_name"] = std::move(step.additional_name);
+
     route_step.values["mode"] = detail::modeToString(std::move(step.mode));
     route_step.values["maneuver"] = makeStepManeuver(std::move(step.maneuver));
     route_step.values["geometry"] = std::move(geometry);

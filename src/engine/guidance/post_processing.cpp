@@ -84,7 +84,9 @@ bool setUpRoundabout(RouteStep &step)
     if (leavesRoundabout(instruction))
     {
         step.maneuver.exit = 1; // count the otherwise missing exit
-        if (instruction.type == TurnType::EnterRotaryAtExit)
+
+        // prevent futher special case handling of these two.
+        if (instruction.type == TurnType::EnterAndExitRotary)
             step.maneuver.instruction = TurnType::EnterRotary;
         else
             step.maneuver.instruction = TurnType::EnterRoundabout;
@@ -139,6 +141,8 @@ void closeOffRoundabout(const bool on_roundabout,
                 // This requires some initial thought on the data format, though
                 propagation_step.maneuver.exit = step.maneuver.exit;
                 propagation_step.geometry_end = step.geometry_end;
+                // remember rotary name
+                propagation_step.additional_name = propagation_step.name;
                 propagation_step.name = step.name;
                 propagation_step.name_id = step.name_id;
                 break;
@@ -308,7 +312,7 @@ LegGeometry resyncGeometry(LegGeometry leg_geometry, const std::vector<RouteStep
         leg_geometry.segment_offsets.push_back(step.geometry_end - 1);
     }
 
-    //remove the data fromt the reached-target step again
+    // remove the data from the reached-target step again
     leg_geometry.segment_offsets.pop_back();
     leg_geometry.segment_distances.pop_back();
 
