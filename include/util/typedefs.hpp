@@ -30,5 +30,5 @@ static const EdgeID SPECIAL_EDGEID = std::numeric_limits<unsigned>::max();
 static const unsigned INVALID_NAMEID = std::numeric_limits<unsigned>::max();
 static const unsigned INVALID_COMPONENTID = 0;
 static const EdgeWeight INVALID_EDGE_WEIGHT = std::numeric_limits<int>::max();
-
+static const EdgeWeight MIN_INVALID_EDGE_WEIGHT = 0;
 #endif /* TYPEDEFS_H */

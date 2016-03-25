@@ -140,9 +140,15 @@ template <class DataFacadeT> class ViaRoutePlugin final : public BasePlugin
         // allow for connection in one direction.
         if (raw_route.is_valid())
         {
-            auto generator = MakeApiResponseGenerator(facade);
-            generator.DescribeRoute(route_parameters, raw_route, json_result);
-            json_result.values["status_message"] = "Found route between points";
+            if (raw_route.path_is_zero()) {
+                json_result.values["status_message"] = "No route found between points";
+                return Status::Error;
+            }
+            else {
+                auto generator = MakeApiResponseGenerator(facade);
+                generator.DescribeRoute(route_parameters, raw_route, json_result);
+                json_result.values["status_message"] = "Found route between points";
+            }
         }
         else
         {

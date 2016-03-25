@@ -80,13 +80,6 @@ void RequestHandler::handle_request(const http::request &current_request,
             // parsing done, lets call the right plugin to handle the request
             BOOST_ASSERT_MSG(routing_machine != nullptr, "pointer not init'ed");
 
-            if (!route_parameters.jsonp_parameter.empty())
-            { // prepend response with jsonp parameter
-                const std::string json_p = (route_parameters.jsonp_parameter + "(");
-                current_reply.content.insert(current_reply.content.end(), json_p.begin(),
-                                             json_p.end());
-            }
-
             const int return_code = routing_machine->RunQuery(route_parameters, json_result);
             json_result.values["status"] = return_code;
             // 4xx bad request return code
@@ -100,6 +93,12 @@ void RequestHandler::handle_request(const http::request &current_request,
             {
                 // 2xx valid request
                 BOOST_ASSERT(return_code / 100 == 2);
+            }
+            if (!route_parameters.jsonp_parameter.empty())
+            { // prepend response with jsonp parameter
+                const std::string json_p = (route_parameters.jsonp_parameter + "(");
+                current_reply.content.insert(current_reply.content.end(), json_p.begin(),
+                                             json_p.end());
             }
         }
         else

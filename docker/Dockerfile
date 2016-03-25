@@ -1,19 +1,49 @@
-FROM ubuntu:14.04
+FROM ubuntu:trusty
+MAINTAINER Alex Newman <alex@newman.pro>
 
-RUN apt-get update -y
-RUN apt-get install -y build-essential git-core python-pip python-software-properties software-properties-common
+# Let the container know that there is no TTY
+ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get -y install gcc-4.8 g++-4.8 libboost1.55-all-dev llvm-3.4
-RUN apt-get -y install libbz2-dev libstxxl-dev libstxxl1 libxml2-dev
-RUN apt-get -y install libzip-dev lua5.1 liblua5.1-0-dev libtbb-dev libgdal-dev ruby1.9
-RUN apt-get -y install curl cmake cmake-curses-gui
+# Install necessary packages for proper system state
+RUN apt-get -y update && apt-get install -y \
+    build-essential \
+    git \
+    cmake \
+    pkg-config \
+    libbz2-dev \
+    libstxxl-dev \
+    libstxxl-doc \
+    libstxxl1 \
+    libxml2-dev \
+    libzip-dev \
+    libboost-all-dev \
+    lua5.1 \
+    liblua5.1-0-dev \
+    libluabind-dev \
+    libluajit-5.1-dev \
+    libtbb-dev
+    
+RUN git clone https://github.com/shvilek/osrm-backend.git /tmp/src \
+ && mkdir –p build \
+ && cd build \
+ && cmake /tmp/src \
+ && make \
+ && mv /tmp/src/profiles/sputnik_foot.lua profile.lua \
+ && mv /tmp/src/profiles/lib/ lib \
+ && echo "disk=/tmp/stxxl,25000,syscall" > .stxxl \
+ && rm -rf /tmp/src
+ 
+WORKDIR build
 
-RUN pip install awscli
+# Cleanup --------------------------------
 
-# luabind
-RUN curl https://gist.githubusercontent.com/DennisOSRM/f2eb7b948e6fe1ae319e/raw/install-luabind.sh | sudo bash
+RUN apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
-RUN useradd -ms /bin/bash mapbox
-USER mapbox
-ENV HOME /home/mapbox
-WORKDIR /home/mapbox
+# Publish --------------------------------
+
+COPY docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint.sh
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+EXPOSE 5000
