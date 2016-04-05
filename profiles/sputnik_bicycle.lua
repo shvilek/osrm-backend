@@ -411,7 +411,7 @@ function way_function (way, result)
     elseif tracktype == nil then
       result.forward_speed = result.backward_speed * 1.1
       result.backward_speed  = result.backward_speed * 1.1
-    elseif tracktype and tracktype.starts("gradel") then
+    elseif tracktype != nil and tracktype.starts("gradel") then
       result.forward_speed = result.backward_speed * 1.2
       result.backward_speed  = result.backward_speed * 1.2
     end
