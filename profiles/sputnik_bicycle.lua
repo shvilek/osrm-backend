@@ -113,7 +113,9 @@ local mode_train = 4
 local mode_movable_bridge = 5
 
 function string.starts(String,Start)
-   return string.sub(String,1,string.len(Start))==Start
+  if Start == nil then
+    return false
+  return string.sub(String,1,string.len(Start))==Start
 end
 
 local function parse_maxspeed(source)
