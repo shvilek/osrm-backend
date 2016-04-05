@@ -115,6 +115,7 @@ local mode_movable_bridge = 5
 function string.starts(String,Start)
   if Start == nil then
     return false
+  end
   return string.sub(String,1,string.len(Start))==Start
 end
 
