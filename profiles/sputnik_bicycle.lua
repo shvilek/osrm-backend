@@ -176,6 +176,8 @@ function way_function (way, result)
   local amenity = way:get_value_by_key("amenity")
   local public_transport = way:get_value_by_key("public_transport")
   local bridge = way:get_value_by_key("bridge")
+  local sidewalk = way:get_value_by_key("sidewalk")
+
   if (not highway or highway == '') and
   (not route or route == '') and
   (not use_public_transport or not railway or railway=='') and
@@ -418,7 +420,11 @@ function way_function (way, result)
       result.forward_speed = result.backward_speed * 1.2
       result.backward_speed  = result.backward_speed * 1.2
     end
-
+  elseif highway == "primary" or highway == "secondary" then
+    if sidewalk == nil or sidewalk == "no" then
+      result.forward_speed = result.backward_speed * 0.6
+      result.backward_speed  = result.backward_speed * 0.6
+    end
   end 
 
   -- maxspeed
